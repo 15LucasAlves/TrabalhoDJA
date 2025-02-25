@@ -1,0 +1,4 @@
+repository "Projeto_DJA@Paiva_01@cloud"
+  path "/"
+    br "/main"
+    co "/main"
