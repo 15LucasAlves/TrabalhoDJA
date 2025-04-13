@@ -56,7 +56,7 @@ public class EnemyStats : MonoBehaviour
         CurrentHealth -= amount;
         CurrentHealth = Mathf.Max(CurrentHealth, 0);
 
-        GetComponent<EnemyCombat>()?.PlayTakeDamageAnimation();
+       
 
         if (CurrentHealth <= 0)
         {

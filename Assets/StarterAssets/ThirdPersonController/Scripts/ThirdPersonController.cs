@@ -127,6 +127,12 @@ namespace StarterAssets
         private float _rollTimer = 0f;
 
 
+        //npc talking
+        private bool _isTalkingToNPC = false;
+        private Transform _currentNPCTransform;
+        private float _conversationCameraPitch = 20f;
+
+
         // timeout deltatime
         private float _jumpTimeoutDelta;
         private float _fallTimeoutDelta;
@@ -216,6 +222,22 @@ namespace StarterAssets
 
         private void LateUpdate()
         {
+            if (_isTalkingToNPC && _currentNPCTransform != null)
+            {
+                // Lock camera to NPC's position
+                Vector3 direction = _currentNPCTransform.position - CinemachineCameraTarget.transform.position;
+                float yaw = Mathf.Atan2(direction.x, direction.z) * Mathf.Rad2Deg;
+                float pitch = Mathf.Asin(direction.y / direction.magnitude) * Mathf.Rad2Deg;
+
+                // Adjust the pitch to avoid looking at the ground
+                pitch = Mathf.Clamp(pitch, _conversationCameraPitch, TopClamp);
+
+                _cinemachineTargetYaw = Mathf.LerpAngle(_cinemachineTargetYaw, yaw, Time.deltaTime * 5f);
+                _cinemachineTargetPitch = Mathf.LerpAngle(_cinemachineTargetPitch, pitch, Time.deltaTime * 5f);
+
+                CinemachineCameraTarget.transform.rotation = Quaternion.Euler(_cinemachineTargetPitch + CameraAngleOverride, _cinemachineTargetYaw, 0.0f);
+                return; // Skip rest of LateUpdate while talking
+            }
             if (isLockedOn && currentLockOnTarget != null)
             {
                 // Smoothly transition to the locked-on camera position
@@ -259,6 +281,18 @@ namespace StarterAssets
             // Cinemachine will follow this target
             CinemachineCameraTarget.transform.rotation = Quaternion.Euler(_cinemachineTargetPitch + CameraAngleOverride,
                 _cinemachineTargetYaw, 0.0f);
+        }
+
+        public void LockCameraOnTarget(Transform npcTransform)
+        {
+            _isTalkingToNPC = true;
+            _currentNPCTransform = npcTransform;
+        }
+
+        public void UnlockCamera()
+        {
+            _isTalkingToNPC = false;
+            _currentNPCTransform = null;
         }
 
         private void AssignAnimationIDs()

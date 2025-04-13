@@ -23,28 +23,27 @@ namespace StarterAssets
         public int maxFastAttacks = 3;
 
         [Header("References")]
-        public Animator animator;
+        public Animator animator; // Reference to the animator (set in Inspector or auto-found)
         private float heavyAttackTimer;
-        private bool canAttack = true;
+        private bool canAttack = true; // Set false to block attacks
         private int fastAttackCount = 0;
         private bool isFastAttacking = false;
         public float fastAttackDelay = 2f; // Delay between fast attacks
 
-        //atencao aqui no start attack
-        // StartAttack(false) = fast attacks.
-        // StartAttack(true) = heavy attacks.
-        bool fastAttack = false; 
-        bool heavyAttack = true;
+        // Additional flag to disable attack input during conversations
+        private bool isConversationActive = false;
 
-        //damage
+        // These booleans help indicate which type of attack is being made
+        private bool fastAttack = false;
+        private bool heavyAttack = true;
+
         private SwordDamage _swordDamage;
 
-        // Animation
         private int _animIDHeavyAttack;
         private int _animIDFastAttack1;
         private int _animIDFastAttack2;
         private int _animIDFastAttack3;
-        private Animator _animator;
+        private Animator _animator;  // Secondary animator reference in case you need to re-get it
         private StarterAssetsInputs _input;
         public bool _hasAnimator;
 
@@ -53,6 +52,7 @@ namespace StarterAssets
         private void Awake()
         {
             _input = GetComponent<StarterAssetsInputs>();
+            // Get the animator if it was not assigned in the Inspector
             if (animator == null)
                 animator = GetComponentInChildren<Animator>();
 
@@ -77,16 +77,24 @@ namespace StarterAssets
 
         private void Update()
         {
+            // Refresh animator reference if needed
             _hasAnimator = TryGetComponent(out _animator);
-            HandleAttackInput();
+
+            // Only process attack input when the conversation is NOT active
+            if (!isConversationActive)
+            {
+                HandleAttackInput();
+            }
+
             UpdateCooldown();
         }
 
         private void HandleAttackInput()
         {
+            // Process fast attack input if conditions are met
             if (_input.FastAttack && canAttack && !isFastAttacking && _playerStamina.CurrentStamina >= fastAttackStaminaCost)
             {
-                // If too much time has passed, reset the combo
+                // Reset combo if enough time has passed
                 if (Time.time - lastAttackTime > comboResetTime)
                 {
                     fastAttackCount = 0;
@@ -102,16 +110,13 @@ namespace StarterAssets
                 _input.FastAttack = false;
             }
 
-            // Heavy attack
+            // Process heavy attack input if conditions are met
             if (_input.HeavyAttack && canAttack && _playerStamina.CurrentStamina >= heavyAttackStaminaCost)
             {
                 PerformHeavyAttack();
                 _input.HeavyAttack = false;
             }
         }
-
-
-     
 
         private void PerformFastAttack(int attackIndex)
         {
@@ -126,7 +131,6 @@ namespace StarterAssets
             }
 
             _playerStamina.ConsumeStamina(fastAttackStaminaCost);
-
             canAttack = false;
             isFastAttacking = true;
 
@@ -136,7 +140,6 @@ namespace StarterAssets
             StartCoroutine(FastAttackCooldown(attackIndex));
             StartCoroutine(ResetFastAttackDelay());
         }
-
 
         private IEnumerator ResetFastAttackDelay()
         {
@@ -171,8 +174,6 @@ namespace StarterAssets
             }
         }
 
-
-
         private void PerformHeavyAttack()
         {
             if (_swordDamage != null)
@@ -204,8 +205,24 @@ namespace StarterAssets
             }
         }
 
+        // Called externally (for example, by the conversation system) to disable attack inputs.
+        public void DisableAttacks()
+        {
+            canAttack = false;            // Immediately prevent any new attacks.
+            isConversationActive = true;  // Mark that we're in conversation mode.
+        }
+
+        // Called externally to re-enable attack inputs.
+        public void EnableAttacks()
+        {
+            canAttack = true;             // Allow attacks again.
+            isConversationActive = false; // Mark that conversation is no longer active.
+        }
+
         private void UpdateCooldown()
         {
+            // Only update the heavy attack cooldown when attacks are disabled;
+            // this helps re-enable attacks after the cooldown is over, if needed.
             if (!canAttack)
             {
                 heavyAttackTimer -= Time.deltaTime;
