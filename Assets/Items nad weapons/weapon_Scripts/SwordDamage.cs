@@ -8,10 +8,10 @@ public class SwordDamage : MonoBehaviour
     public string enemyTag = "Enemy";
 
 
+
+
     private bool isAttacking = false;
     private bool isHeavy = false;
-
- 
 
     private void OnTriggerEnter(Collider other)
     {
@@ -23,7 +23,8 @@ public class SwordDamage : MonoBehaviour
             if (enemy != null)
             {
                 int damage = isHeavy ? damageAmountHeavyAttack : damageAmountFastAttack;
-                enemy.TakeDamage(damage);
+               
+                enemy.EnemyTakeDamage(damage);
             }
         }
     }

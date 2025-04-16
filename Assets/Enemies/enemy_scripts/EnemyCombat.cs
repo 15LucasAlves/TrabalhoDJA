@@ -5,17 +5,17 @@ using UnityEngine.AI;
 public class EnemyCombat : MonoBehaviour
 {
     [Header("Attack Settings")]
-    public float attackRange = 2f;      // Maximum range at which the sword can damage the player
-    public float attackCooldown = 2f;   // Time between consecutive attacks
-    public int attackDamage = 10;       // Damage dealt by the sword
+    public float attackRange = 2f;
+    public float attackCooldown = 2f;
+    public int attackDamage = 10;
 
     [Header("Attack Timing")]
-    public float warningDelay = 0.5f;   // Wind-up delay before the sword strike deals damage
+    public float warningDelay = 1f;
 
     [Header("Movement Settings")]
-    public float chaseRange = 6f;       // Range within which the enemy will chase the player
-    public float stopDistance = 1.5f;   // Distance at which the enemy stops moving to attack
-    public float rotationSpeed = 5f;    // Speed at which the enemy rotates toward the player
+    public float chaseRange = 6f;
+    public float stopDistance = 1.5f;
+    public float rotationSpeed = 5f;
 
     [Header("Animation")]
     public Animator animator;
@@ -23,9 +23,9 @@ public class EnemyCombat : MonoBehaviour
     private Transform player;
     private bool canAttack = true;
     private NavMeshAgent agent;
-
-    // Flag indicating that the enemy attack is actively executing its damage window.
     private bool isAttackExecuting = false;
+
+    private Vector3 lastKnownPlayerPosition;
 
     private void Start()
     {
@@ -37,44 +37,50 @@ public class EnemyCombat : MonoBehaviour
             animator = GetComponent<Animator>();
 
         agent = GetComponent<NavMeshAgent>();
-        // Disable automatic agent rotation so we can manually control facing.
         agent.updateRotation = false;
     }
 
-    private void Update()
+  private void Update()
+{
+    if (player == null) return;
+
+    float distance = Vector3.Distance(transform.position, player.position);
+
+    // If the player is outside of attack range, chase them
+    if (distance > attackRange && distance <= chaseRange)
     {
-        if (player == null)
-            return;
+        agent.SetDestination(player.position);
+        animator?.SetBool("IsWalking", true);
+    }
+    // Stop moving and idle if the player is in attack range
+    else if (distance <= attackRange)
+    {
+        agent.SetDestination(transform.position);
+        animator?.SetBool("IsWalking", false);
 
-        float distance = Vector3.Distance(transform.position, player.position);
+        // Begin attack if able
+        if (canAttack)
+            StartCoroutine(PerformAttack());
+    }
+    // Player is too far away — stop moving
+    else if (distance > chaseRange)
+    {
+        agent.SetDestination(transform.position);
+        animator?.SetBool("IsWalking", false);
+    }
 
-        // Movement: Chase the player if within chaseRange but outside stopDistance.
-        if (distance <= chaseRange && distance > stopDistance)
-        {
-            agent.SetDestination(player.position);
-            animator?.SetBool("IsWalking", true);
-        }
-        // If the player is too far away, stop chasing.
-        else if (distance > chaseRange)
-        {
-            agent.SetDestination(transform.position);
-            animator?.SetBool("IsWalking", false);
-        }
-        // If the enemy is close enough, stop moving and try to attack.
-        else if (distance <= stopDistance)
-        {
-            agent.SetDestination(transform.position);
-            animator?.SetBool("IsWalking", false);
+    // Rotate toward the player unless attacking
+    if (!isAttackExecuting)
+    {
+        RotateTowards(player.position);
+    }
+}
 
-            if (canAttack)
-            {
-                StartCoroutine(PerformAttack());
-            }
-        }
 
-        // Smoothly rotate toward the player so the enemy always faces its target.
-        Vector3 direction = player.position - transform.position;
-        direction.y = 0f; // Keep rotation horizontal.
+    private void RotateTowards(Vector3 targetPosition)
+    {
+        Vector3 direction = targetPosition - transform.position;
+        direction.y = 0f;
         if (direction.sqrMagnitude > 0.001f)
         {
             Quaternion targetRotation = Quaternion.LookRotation(direction);
@@ -87,42 +93,46 @@ public class EnemyCombat : MonoBehaviour
         canAttack = false;
         isAttackExecuting = true;
 
-        // Trigger the attack animation.
+        // Save the player's last known position
+        lastKnownPlayerPosition = player.position;
+
+        // Trigger the attack animation
         animator?.SetTrigger("Attack");
 
-        // Wait for the wind-up (warning) delay.
+        // Wait before striking (telegraph)
         yield return new WaitForSeconds(warningDelay);
 
-        // Only apply damage if the enemy is still executing its attack.
-        if (isAttackExecuting)
-        {
-            float distance = Vector3.Distance(transform.position, player.position);
-            Vector3 directionToPlayer = (player.position - transform.position).normalized;
-            float angleToPlayer = Vector3.Angle(transform.forward, directionToPlayer);
+        // Rotate to face the saved position before striking
+        RotateTowards(lastKnownPlayerPosition);
 
-            // Apply damage only if the player is within attackRange and roughly in front (within 45°).
-            if (distance <= attackRange && angleToPlayer < 45f)
+        float distance = Vector3.Distance(transform.position, lastKnownPlayerPosition);
+        Vector3 directionToLastKnown = (lastKnownPlayerPosition - transform.position).normalized;
+        float angle = Vector3.Angle(transform.forward, directionToLastKnown);
+
+        if (distance <= attackRange && angle < 45f)
+        {
+            // Check if player is still in damage area
+            float currentDistance = Vector3.Distance(transform.position, player.position);
+            Vector3 currentDirection = (player.position - transform.position).normalized;
+            float currentAngle = Vector3.Angle(transform.forward, currentDirection);
+
+            if (currentDistance <= attackRange && currentAngle < 45f)
             {
                 PlayerStats playerStats = player.GetComponent<PlayerStats>();
                 if (playerStats != null)
                 {
-                    playerStats.TakeDamage(attackDamage);
-                    Debug.Log("Player took damage from enemy sword!");
+                    playerStats.PlayerTakeDamage(attackDamage);
                 }
             }
         }
 
-        // End the active attack window.
         isAttackExecuting = false;
-
-        // Wait for the cooldown period before the next attack.
         yield return new WaitForSeconds(attackCooldown);
         canAttack = true;
     }
 
     private void OnDrawGizmosSelected()
     {
-        // Visualize the attack and chase ranges in the Editor.
         Gizmos.color = Color.red;
         Gizmos.DrawWireSphere(transform.position, attackRange);
         Gizmos.color = Color.yellow;

@@ -1,5 +1,6 @@
 using UnityEngine;
 using UnityEngine.AI;
+using UnityEngine.UI;
 
 public class EnemyStats : MonoBehaviour
 {
@@ -11,52 +12,61 @@ public class EnemyStats : MonoBehaviour
     public float followRange = 15f;
     public float stopDistance = 2f;
 
+    [Header("UI")]
+    public GameObject healthBarPrefab;
+
+    [Header("Animation")]
+    public Animator animator;
+
+    private Slider healthSlider;
+    private Transform healthBar;
+    private Vector3 healthBarOffset = new Vector3(0, 2.2f, 0);
+
     private Transform player;
-    private NavMeshAgent agent;
 
     private void Start()
     {
         CurrentHealth = maxHealth;
         player = GameObject.FindGameObjectWithTag("Player")?.transform;
 
-        agent = GetComponent<NavMeshAgent>();
-        if (agent == null)
+
+
+        if (healthBarPrefab != null)
         {
-            agent = gameObject.AddComponent<NavMeshAgent>();
-            Debug.LogWarning("NavMeshAgent was not found. Adding one to the enemy.");
+            GameObject hb = Instantiate(healthBarPrefab, transform.position + healthBarOffset, Quaternion.identity);
+            healthBar = hb.transform;
+            healthSlider = hb.GetComponentInChildren<Slider>();
+            if (healthSlider != null)
+            {
+                healthSlider.maxValue = maxHealth;
+                healthSlider.value = CurrentHealth;
+            }
         }
     }
 
     private void Update()
     {
-        if (player != null && CurrentHealth > 0)
+
+        if (healthBar != null)
         {
-            float distance = Vector3.Distance(transform.position, player.position);
-            if (distance <= followRange && distance > stopDistance)
-            {
-                FollowPlayer();
-            }
-            else
-            {
-                agent.SetDestination(transform.position); // Stop moving
-            }
+            healthBar.position = transform.position + healthBarOffset;
+            healthBar.forward = Camera.main.transform.forward;
         }
     }
 
-    private void FollowPlayer()
-    {
-        if (agent != null)
-        {
-            agent.destination = player.position;
-        }
-    }
 
-    public void TakeDamage(int amount)
+    //this is referenced in the SwordDamage.cs script
+    public void EnemyTakeDamage(int amount)
     {
+        //here animation is just for this one, need to change in the future 
+        animator.SetTrigger("TakeDamage");
         CurrentHealth -= amount;
         CurrentHealth = Mathf.Max(CurrentHealth, 0);
 
-       
+        if (healthSlider != null)
+        {
+            healthSlider.value = CurrentHealth;
+        }
 
         if (CurrentHealth <= 0)
         {
@@ -64,15 +74,15 @@ public class EnemyStats : MonoBehaviour
         }
     }
 
+    //in the future add animations and stuff like that
     private void Die()
     {
-        agent.isStopped = true;
-        Destroy(gameObject, 1.5f);
-    }
 
-    private void OnGUI()
-    {
-        Vector3 screenPos = Camera.main.WorldToScreenPoint(transform.position + Vector3.up * 2);
-        GUI.Label(new Rect(screenPos.x - 50, Screen.height - screenPos.y, 100, 20), $"HP: {CurrentHealth}");
+        if (healthBar != null)
+        {
+            Destroy(healthBar.gameObject);
+        }
+
+        Destroy(gameObject, 1.5f);
     }
 }

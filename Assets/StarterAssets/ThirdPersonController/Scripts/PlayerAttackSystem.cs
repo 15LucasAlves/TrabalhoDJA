@@ -10,11 +10,12 @@ namespace StarterAssets
     {
         [Header("Attack Settings")]
         public float heavyAttackCooldown = 1.5f;
-        public float fastAttackCooldown = 0.5f;
+        public float fastAttackCooldown = 0.8f;
 
         [Header("Combo Timing")]
-        public float comboResetTime = 1.2f; // Time window to chain the next attack
-        private float lastAttackTime = 0.5f;
+        public float comboResetTime = 1.2f;
+        public float comboMinTime = 1f;
+        private float lastAttackTime = 1f;
 
         [Header("Stamina")]
         public float heavyAttackStaminaCost = 6f;
@@ -22,18 +23,22 @@ namespace StarterAssets
 
         public int maxFastAttacks = 3;
 
+
+        //we should change this later, cuz it doesent look nice but it is to show the combo right timing
         [Header("References")]
-        public Animator animator; // Reference to the animator (set in Inspector or auto-found)
+        public Animator animator;
+        public Renderer swordRenderer; 
+        public Color normalSwordColor = Color.white;
+        public Color comboReadyColor = Color.green;
+
         private float heavyAttackTimer;
-        private bool canAttack = true; // Set false to block attacks
+        private bool canAttack = true;
         private int fastAttackCount = 0;
         private bool isFastAttacking = false;
-        public float fastAttackDelay = 2f; // Delay between fast attacks
+        public float fastAttackDelay = 2f;
 
-        // Additional flag to disable attack input during conversations
         private bool isConversationActive = false;
 
-        // These booleans help indicate which type of attack is being made
         private bool fastAttack = false;
         private bool heavyAttack = true;
 
@@ -43,7 +48,7 @@ namespace StarterAssets
         private int _animIDFastAttack1;
         private int _animIDFastAttack2;
         private int _animIDFastAttack3;
-        private Animator _animator;  // Secondary animator reference in case you need to re-get it
+        private Animator _animator;
         private StarterAssetsInputs _input;
         public bool _hasAnimator;
 
@@ -52,7 +57,6 @@ namespace StarterAssets
         private void Awake()
         {
             _input = GetComponent<StarterAssetsInputs>();
-            // Get the animator if it was not assigned in the Inspector
             if (animator == null)
                 animator = GetComponentInChildren<Animator>();
 
@@ -77,40 +81,51 @@ namespace StarterAssets
 
         private void Update()
         {
-            // Refresh animator reference if needed
             _hasAnimator = TryGetComponent(out _animator);
 
-            // Only process attack input when the conversation is NOT active
             if (!isConversationActive)
             {
                 HandleAttackInput();
             }
 
             UpdateCooldown();
+            UpdateSwordColor();
         }
 
         private void HandleAttackInput()
         {
-            // Process fast attack input if conditions are met
-            if (_input.FastAttack && canAttack && !isFastAttacking && _playerStamina.CurrentStamina >= fastAttackStaminaCost)
-            {
-                // Reset combo if enough time has passed
-                if (Time.time - lastAttackTime > comboResetTime)
-                {
-                    fastAttackCount = 0;
-                }
+            float timeSinceLast = Time.time - lastAttackTime;
 
-                if (fastAttackCount < maxFastAttacks)
+            if (_input.FastAttack && canAttack && !isFastAttacking)
+            {
+                if (_playerStamina.CurrentStamina >= fastAttackStaminaCost)
                 {
-                    PerformFastAttack(fastAttackCount);
-                    fastAttackCount++;
-                    lastAttackTime = Time.time;
+                    // Enforce combo timing window
+                    if (timeSinceLast < comboMinTime)
+                    {
+                        // spend too much for spaming else is overpowerd
+                        _playerStamina.ConsumeStamina(fastAttackStaminaCost);
+                        _input.FastAttack = false;
+                        return;
+                    }
+
+                    // Reset combo if out of time
+                    if (timeSinceLast > comboResetTime)
+                    {
+                        fastAttackCount = 0;
+                    }
+
+                    if (fastAttackCount < maxFastAttacks)
+                    {
+                        PerformFastAttack(fastAttackCount);
+                        fastAttackCount++;
+                        lastAttackTime = Time.time;
+                    }
                 }
 
                 _input.FastAttack = false;
             }
 
-            // Process heavy attack input if conditions are met
             if (_input.HeavyAttack && canAttack && _playerStamina.CurrentStamina >= heavyAttackStaminaCost)
             {
                 PerformHeavyAttack();
@@ -166,7 +181,6 @@ namespace StarterAssets
 
             canAttack = true;
 
-            // Reset combo if no further input in time
             yield return new WaitForSeconds(comboResetTime);
             if (Time.time - lastAttackTime >= comboResetTime)
             {
@@ -185,7 +199,6 @@ namespace StarterAssets
             }
 
             _playerStamina.ConsumeStamina(heavyAttackStaminaCost);
-
             canAttack = false;
             heavyAttackTimer = heavyAttackCooldown;
 
@@ -205,24 +218,20 @@ namespace StarterAssets
             }
         }
 
-        // Called externally (for example, by the conversation system) to disable attack inputs.
         public void DisableAttacks()
         {
-            canAttack = false;            // Immediately prevent any new attacks.
-            isConversationActive = true;  // Mark that we're in conversation mode.
+            canAttack = false;
+            isConversationActive = true;
         }
 
-        // Called externally to re-enable attack inputs.
         public void EnableAttacks()
         {
-            canAttack = true;             // Allow attacks again.
-            isConversationActive = false; // Mark that conversation is no longer active.
+            canAttack = true;
+            isConversationActive = false;
         }
 
         private void UpdateCooldown()
         {
-            // Only update the heavy attack cooldown when attacks are disabled;
-            // this helps re-enable attacks after the cooldown is over, if needed.
             if (!canAttack)
             {
                 heavyAttackTimer -= Time.deltaTime;
@@ -231,6 +240,16 @@ namespace StarterAssets
                     canAttack = true;
                 }
             }
+        }
+
+        private void UpdateSwordColor()
+        {
+            if (swordRenderer == null) return;
+
+            float timeSinceLast = Time.time - lastAttackTime;
+            bool isInComboWindow = timeSinceLast >= comboMinTime && timeSinceLast <= comboResetTime && fastAttackCount > 0 && fastAttackCount < maxFastAttacks;
+
+            swordRenderer.material.color = isInComboWindow ? comboReadyColor : normalSwordColor;
         }
     }
 }
