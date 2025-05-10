@@ -1,16 +1,17 @@
 using UnityEngine;
 using UnityEngine.UI;
 using System.Collections;
+using UnityEngine.SceneManagement;
 
-public class EnemyStats : MonoBehaviour
+public class BossStats : MonoBehaviour
 {
     [Header("Stats")]
-    public int maxHealth = 100;
+    public int maxHealth = 10; // Vida maior para o chefe
     public int CurrentHealth { get; private set; }
 
     [Header("Detection")]
-    public float followRange = 15f;
-    public float stopDistance = 2f;
+    public float followRange = 20f; // Maior alcance de detecção
+    public float stopDistance = 3f;
 
     [Header("UI")]
     public GameObject healthBarPrefab;
@@ -20,7 +21,7 @@ public class EnemyStats : MonoBehaviour
 
     private Slider healthSlider;
     private Transform healthBar;
-    private Vector3 healthBarOffset = new Vector3(0, 2.2f, 0);
+    private Vector3 healthBarOffset = new Vector3(0, 4f, 0); // Ajuste para o tamanho do chefe
 
     private Transform player;
 
@@ -51,8 +52,8 @@ public class EnemyStats : MonoBehaviour
         }
     }
 
-    // Método chamado para aplicar dano ao inimigo
-    public void EnemyTakeDamage(int amount)
+    // Método chamado para aplicar dano ao chefe
+    public void BossTakeDamage(int amount)
     {
         if (animator != null)
         {
@@ -61,6 +62,9 @@ public class EnemyStats : MonoBehaviour
 
         CurrentHealth -= amount;
         CurrentHealth = Mathf.Max(CurrentHealth, 0);
+
+        // Imprime a vida atual no console
+        Debug.Log($"Boss Current Health: {CurrentHealth}");
 
         if (healthSlider != null)
         {
@@ -87,7 +91,7 @@ public class EnemyStats : MonoBehaviour
         }
     }
 
-    // Método chamado quando o inimigo morre
+    // Método chamado quando o chefe morre
     private void Die()
     {
         if (healthBar != null)
@@ -96,5 +100,8 @@ public class EnemyStats : MonoBehaviour
         }
 
         Destroy(gameObject, 1.5f);
+        // Inicia a transição de cena com fade
+        SceneManager.LoadScene("Gambling1");
     }
+
 }

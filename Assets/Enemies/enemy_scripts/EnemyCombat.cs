@@ -10,7 +10,7 @@ public class EnemyCombat : MonoBehaviour
     public int attackDamage = 10;
 
     [Header("Attack Timing")]
-    public float warningDelay = 1f;
+    public float warningDelay = 2f;
 
     [Header("Movement Settings")]
     public float chaseRange = 6f;
@@ -90,19 +90,26 @@ public class EnemyCombat : MonoBehaviour
 
     private IEnumerator PerformAttack()
     {
+        if (animator == null)
+        {
+            Debug.LogWarning("Animator não está atribuído ao EnemyCombat.");
+            yield break;
+        }
+
         canAttack = false;
         isAttackExecuting = true;
 
-        // Save the player's last known position
+        // Salvar a última posição conhecida do jogador
         lastKnownPlayerPosition = player.position;
 
-        // Trigger the attack animation
-        animator?.SetTrigger("Attack");
+        // Garantir que o trigger de ataque seja resetado antes de ativar
+        GetComponent<Animator>().ResetTrigger("Attack");
+        GetComponent<Animator>().SetTrigger("Attack");
 
-        // Wait before striking (telegraph)
+        // Esperar antes de atacar (telegraph)
         yield return new WaitForSeconds(warningDelay);
 
-        // Rotate to face the saved position before striking
+        // Rotacionar para a posição salva antes de atacar
         RotateTowards(lastKnownPlayerPosition);
 
         float distance = Vector3.Distance(transform.position, lastKnownPlayerPosition);
@@ -111,7 +118,7 @@ public class EnemyCombat : MonoBehaviour
 
         if (distance <= attackRange && angle < 45f)
         {
-            // Check if player is still in damage area
+            // Verificar se o jogador ainda está na área de dano
             float currentDistance = Vector3.Distance(transform.position, player.position);
             Vector3 currentDirection = (player.position - transform.position).normalized;
             float currentAngle = Vector3.Angle(transform.forward, currentDirection);
@@ -130,6 +137,7 @@ public class EnemyCombat : MonoBehaviour
         yield return new WaitForSeconds(attackCooldown);
         canAttack = true;
     }
+
 
     private void OnDrawGizmosSelected()
     {

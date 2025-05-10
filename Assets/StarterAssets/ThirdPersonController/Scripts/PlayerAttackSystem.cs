@@ -39,9 +39,6 @@ namespace StarterAssets
 
         private bool isConversationActive = false;
 
-        private bool fastAttack = false;
-        private bool heavyAttack = true;
-
         private SwordDamage _swordDamage;
 
         private int _animIDHeavyAttack;
@@ -150,7 +147,9 @@ namespace StarterAssets
             isFastAttacking = true;
 
             if (_swordDamage != null)
-                _swordDamage.StartAttack(fastAttack);
+            {
+                _swordDamage.StartAttack(false, 1f); // Adiciona um atraso de 0.2 segundos
+            }
 
             StartCoroutine(FastAttackCooldown(attackIndex));
             StartCoroutine(ResetFastAttackDelay());
@@ -167,7 +166,7 @@ namespace StarterAssets
             yield return new WaitForSeconds(fastAttackCooldown);
 
             if (_swordDamage != null)
-                _swordDamage.EndAttack();
+                _swordDamage.EndAttack(); // Desativa a hitbox da espada
 
             if (_hasAnimator)
             {
@@ -191,7 +190,9 @@ namespace StarterAssets
         private void PerformHeavyAttack()
         {
             if (_swordDamage != null)
-                _swordDamage.StartAttack(heavyAttack);
+            {
+                _swordDamage.StartAttack(true, 1f); // Adiciona um atraso de 0.5 segundos
+            }
 
             if (_hasAnimator)
             {
@@ -210,7 +211,7 @@ namespace StarterAssets
             yield return new WaitForSeconds(2f);
 
             if (_swordDamage != null)
-                _swordDamage.EndAttack();
+                _swordDamage.EndAttack(); // Desativa a hitbox da espada
 
             if (_hasAnimator)
             {
