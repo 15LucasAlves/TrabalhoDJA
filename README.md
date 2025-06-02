@@ -23,7 +23,7 @@ Wagering the souls of your fallen foes. Every victory is a gamble, will you gain
 
 ## 🧩 Description
 
-**The Curse of the Gambler** is a Unity-developed soulslike game created for the *Applied Game Development* course. The project introduces a core gameplay twist: players must gamble the souls of defeated bosses in order to progress. Win, and gain power; lose, and face devastating consequences.
+**The Curse of the Gambler** is a Unity-developed soulslike game created for the *Applied Game Development* course. The project introduces a core gameplay twist: players must gamble with the souls of defeated bosses in order to progress. Win, and gain power; lose, and face devastating consequences.
 
 ---
 
@@ -31,7 +31,7 @@ Wagering the souls of your fallen foes. Every victory is a gamble, will you gain
 
 > "Fighting bosses and enemies, perks gained by gambling, good or bad, we will never know."
 
-Each boss you defeat offers a risky choice: gamble their soul for potential power or face consequences if you lose, or skip the gamble and lose the soul forever.
+Each boss you defeat offers a risky choice: gamble with their soul for potential power or face consequences if you lose, or skip the gamble and lose the soul forever.
 
 ---
 
@@ -46,7 +46,7 @@ Each boss you defeat offers a risky choice: gamble their soul for potential powe
 ### 🎲 Gamble Rules
 - All gambles are truly random.  
 - No save-scumming, outcomes are final.  
-- Some souls can only be gambled once.  
+- Some souls can only be gambled with once.  
 - Skipping a gamble means permanently losing that soul.  
 - Penalties include fighting bosses again under new restrictions.
 
@@ -56,7 +56,7 @@ Each boss you defeat offers a risky choice: gamble their soul for potential powe
 
 The player awakens cursed in **Dranft**, a decaying coastal village consumed by myth and greed. After entering a ruined shack tied to local witch legends, they are bound to an ancient gambling ritual.  
 
-To break free, they must defeat six cursed guardians and gamble their souls. The twist? The witch was not the source of the curse, but its final victim.
+To break free, they must defeat six cursed guardians and gamble with their souls. The twist? The witch was not the source of the curse, but its final victim.
 
 The journey ends in a buried chamber beneath the town, where fate itself is dealt like a card game. In the final gamble, the player must choose:  
 - Break the cycle, sacrificing all progress.  
