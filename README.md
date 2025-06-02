@@ -1,9 +1,11 @@
 
 # 🎲 The Curse of the Gambler
 
-A dark soulslike adventure with an innovative progression mechanic: wagering the souls of your fallen foes. Every victory is a gamble, will you gain power or fall deeper into the curse?
+A dark soulslike adventure with an innovative progression mechanic 
 
-![Project Banner]()
+Wagering the souls of your fallen foes. Every victory is a gamble, will you gain power or fall deeper into the curse?
+
+![the curse remains unbroken](https://github.com/user-attachments/assets/3edb51bf-072f-461e-9d3b-9aeb883ee302)
 
 ## 📖 Table of Contents
 - [Description](#description)  
