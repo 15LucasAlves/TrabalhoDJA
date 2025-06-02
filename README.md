@@ -1,12 +1,9 @@
 
 # 🎲 The Curse of the Gambler
 
-A dark soulslike adventure with an innovative progression mechanic: wagering the souls of your fallen foes. Every victory is a gamble — will you gain power or fall deeper into the curse?
+A dark soulslike adventure with an innovative progression mechanic: wagering the souls of your fallen foes. Every victory is a gamble, will you gain power or fall deeper into the curse?
 
 ![Project Banner]()
-
-## 🔗 Repository  
-[GitHub Link](https://github.com/15LucasAlves/TrabalhoDJA)
 
 ## 📖 Table of Contents
 - [Description](#description)  
@@ -30,23 +27,23 @@ A dark soulslike adventure with an innovative progression mechanic: wagering the
 
 ## 💡 One-Tweet Concept
 
-> "Fighting bosses and enemies, perks gained by gambling — good or bad, we will never know."
+> "Fighting bosses and enemies, perks gained by gambling, good or bad, we will never know."
 
-Each boss you defeat offers a risky choice: gamble their soul for potential power or face consequences if you lose — or skip the gamble and lose the soul forever.
+Each boss you defeat offers a risky choice: gamble their soul for potential power or face consequences if you lose, or skip the gamble and lose the soul forever.
 
 ---
 
 ## 🕹️ Gameplay Mechanics
 
 - **Soulslike combat** with heavy attacks, dodging, and parries.  
-- **Gambling System** for boss souls: risk it all to gain unique upgrades — or suffer harsh penalties.  
+- **Gambling System** for boss souls: risk it all to gain unique upgrades, or suffer harsh penalties.  
 - **Exploration** of cursed, interconnected areas with enemies and hidden lore.  
 - **Boss Design** with unique mechanics and gamble scenarios.  
 - **Unpredictable progression**, driven by chance and player choice.
 
 ### 🎲 Gamble Rules
 - All gambles are truly random.  
-- No save-scumming — outcomes are final.  
+- No save-scumming, outcomes are final.  
 - Some souls can only be gambled once.  
 - Skipping a gamble means permanently losing that soul.  
 - Penalties include fighting bosses again under new restrictions.
@@ -57,13 +54,13 @@ Each boss you defeat offers a risky choice: gamble their soul for potential powe
 
 The player awakens cursed in **Dranft**, a decaying coastal village consumed by myth and greed. After entering a ruined shack tied to local witch legends, they are bound to an ancient gambling ritual.  
 
-To break free, they must defeat six cursed guardians and gamble their souls. The twist? The witch was not the source of the curse — but its final victim.
+To break free, they must defeat six cursed guardians and gamble their souls. The twist? The witch was not the source of the curse, but its final victim.
 
 The journey ends in a buried chamber beneath the town, where fate itself is dealt like a card game. In the final gamble, the player must choose:  
 - Break the cycle, sacrificing all progress.  
 - Keep their power, and risk becoming the next cursed dealer.
 
-Multiple endings depend on player choices — how many souls were gambled, skipped, or stolen.
+Multiple endings depend on player choices, how many souls were gambled, skipped, or stolen.
 
 ---
 
@@ -97,7 +94,7 @@ The game is rated PEGI 16 for intense combat, dark themes, and psychological ten
 ### 🧪 Technical Challenges
 
 - Blender-to-Unity compatibility issues (textures must link directly to the BSDF shader).  
-- Failed implementation of crouch mechanic due to collision bugs — ultimately removed for lack of gameplay necessity.
+- Failed implementation of crouch mechanic due to collision bugs, ultimately removed for lack of gameplay necessity.
 
 ---
 
@@ -123,6 +120,6 @@ Though still in early stages, **The Curse of the Gambler** shows strong potentia
 
 ## 👥 Team
 
-- **Lucas Ferreira Alves** (27922)  
-- **Diana Alexandra Teixeira Pinto Alves da Silva** (29625)  
-- **Afonso Maria Nogueira Bernardo da Fonseca Paiva** (27915)
+- **[Lucas Alves](https://github.com/15LucasAlves)** (27922)  
+- **[Diana Silva](https://github.com/aiexsilva)** (29625)  
+- **[Afonso Paiva](https://github.com/AfonsoPaiva)** (27915)
