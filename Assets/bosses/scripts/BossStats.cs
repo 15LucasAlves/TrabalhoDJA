@@ -45,7 +45,6 @@ public class BossStats : MonoBehaviour
         CurrentHealth = maxHealth;
         InitializeHealthBar();
 
-        // Initialize all canvases as inactive
         if (optionCanvas != null) optionCanvas.gameObject.SetActive(false);
         if (redResultCanvas != null) redResultCanvas.gameObject.SetActive(false);
         if (blackResultCanvas != null) blackResultCanvas.gameObject.SetActive(false);
@@ -98,25 +97,17 @@ public class BossStats : MonoBehaviour
 
         deathPosition = transform.position;
 
+        // DESTRUIR BARRA DE VIDA
         if (healthBar != null)
         {
             Destroy(healthBar.gameObject);
         }
 
         SetBossVisible(false);
+        playerAttackSystem?.DisableAttacks();
 
-        if (playerAttackSystem != null)
-        {
-            playerAttackSystem.DisableAttacks();
-        }
-
-        if (showUICoroutine != null)
-        {
-            StopCoroutine(showUICoroutine);
-        }
+        if (showUICoroutine != null) StopCoroutine(showUICoroutine);
         showUICoroutine = StartCoroutine(ShowOptionUI());
-
-        Destroy(gameObject, 10f);
     }
 
     private void SetBossVisible(bool visible)
@@ -139,8 +130,8 @@ public class BossStats : MonoBehaviour
         if (optionCanvas != null)
         {
             optionCanvas.gameObject.SetActive(true);
-
             SetCursorState(true);
+
             if (playerController != null)
             {
                 playerController.LockCameraPosition = true;
@@ -150,10 +141,10 @@ public class BossStats : MonoBehaviour
             if (buttons.Length >= 2)
             {
                 buttons[0].onClick.RemoveAllListeners();
-                buttons[0].onClick.AddListener(() => SelectOption(true)); // Red
+                buttons[0].onClick.AddListener(() => SelectOption(true));
 
                 buttons[1].onClick.RemoveAllListeners();
-                buttons[1].onClick.AddListener(() => SelectOption(false)); // Black
+                buttons[1].onClick.AddListener(() => SelectOption(false));
             }
         }
     }
@@ -161,6 +152,7 @@ public class BossStats : MonoBehaviour
     private void SelectOption(bool choseRed)
     {
         playerChoseRed = choseRed;
+        Debug.Log("Botão pressionado: " + (choseRed ? "Vermelho" : "Preto"));
 
         if (optionCanvas != null)
         {
@@ -179,10 +171,7 @@ public class BossStats : MonoBehaviour
             playerController.LockCameraPosition = false;
         }
 
-        if (playerAttackSystem != null)
-        {
-            playerAttackSystem.EnableAttacks();
-        }
+        playerAttackSystem?.EnableAttacks();
     }
 
     private void LaunchBall(bool choseRed)
@@ -192,7 +181,6 @@ public class BossStats : MonoBehaviour
         Vector3 spawnPosition = deathPosition + ballSpawnOffset;
         spawnedBall = Instantiate(ballPrefab, spawnPosition, Quaternion.identity);
 
-        // Add collision tracker to the ball
         BallCollisionTracker tracker = spawnedBall.AddComponent<BallCollisionTracker>();
         tracker.Initialize(this);
 
@@ -216,22 +204,19 @@ public class BossStats : MonoBehaviour
     public void OnBallCollision(GameObject collidedObject)
     {
         string layerName = LayerMask.LayerToName(collidedObject.layer);
-
-        // Only store if it's Red or Black layer
         if (layerName == "Red" || layerName == "Black")
         {
             lastCollidedLayer = layerName;
-            Debug.Log("Ball collided with relevant object: " + collidedObject.name + " (Layer: " + lastCollidedLayer + ")");
+            Debug.Log("Colisão com: " + layerName);
         }
     }
 
     private IEnumerator CheckBallDecisionAfterDelay()
     {
         yield return new WaitForSeconds(5f);
-
         if (spawnedBall == null) yield break;
 
-        // Show appropriate result canvas first
+        // Mostrar resultado
         if (!string.IsNullOrEmpty(lastCollidedLayer))
         {
             if (lastCollidedLayer == "Red" && redResultCanvas != null)
@@ -248,37 +233,36 @@ public class BossStats : MonoBehaviour
             }
         }
 
-        // Then check the decision
-        bool decisionCorrect = !string.IsNullOrEmpty(lastCollidedLayer) &&
-                             ((playerChoseRed && lastCollidedLayer == "Red") ||
-                              (!playerChoseRed && lastCollidedLayer == "Black"));
+        // Verificar decisão
+        bool errou = !string.IsNullOrEmpty(lastCollidedLayer) &&
+                      ((playerChoseRed && lastCollidedLayer == "Red") ||
+                       (!playerChoseRed && lastCollidedLayer == "Black"));
 
-        if (decisionCorrect)
+        if (errou)
         {
-            UnityEngine.SceneManagement.SceneManager.LoadScene("EndScene");
+            RespawnBoss();
         }
         else
         {
-            RespawnBoss();
+            UnityEngine.SceneManagement.SceneManager.LoadScene("EndScene");
         }
     }
 
     private void RespawnBoss()
     {
-        if (bossPrefab == null)
-        {
-            Debug.LogError("Boss prefab not assigned!");
-            return;
-        }
+        CurrentHealth = maxHealth;
+        isDead = false;
+        transform.position = deathPosition;
 
-        Instantiate(bossPrefab, deathPosition, Quaternion.identity);
+        // RECRIAR BARRA DE VIDA NO RESPAWN
+        InitializeHealthBar();
+        SetBossVisible(true);
+        playerAttackSystem?.EnableAttacks();
 
         if (spawnedBall != null)
         {
             Destroy(spawnedBall);
         }
-
-        Destroy(gameObject);
     }
 
     private void SetCursorState(bool visible)
@@ -318,9 +302,6 @@ public class BallCollisionTracker : MonoBehaviour
 
     private void OnCollisionEnter(Collision collision)
     {
-        if (bossStats != null)
-        {
-            bossStats.OnBallCollision(collision.gameObject);
-        }
+        bossStats?.OnBallCollision(collision.gameObject);
     }
 }
