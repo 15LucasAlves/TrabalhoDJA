@@ -51,7 +51,7 @@ public class EnemyStats : MonoBehaviour
         }
     }
 
-    // Método chamado para aplicar dano ao inimigo
+    // Mï¿½todo chamado para aplicar dano ao inimigo
     public void EnemyTakeDamage(int amount)
     {
         if (animator != null)
@@ -73,21 +73,21 @@ public class EnemyStats : MonoBehaviour
         }
         else
         {
-            // Resetar o bool após um curto intervalo
+            // Resetar o bool apï¿½s um curto intervalo
             StartCoroutine(ResetTakeDamageBool());
         }
     }
 
     private IEnumerator ResetTakeDamageBool()
     {
-        yield return new WaitForSeconds(0.1f); // Ajuste o tempo conforme necessário
+        yield return new WaitForSeconds(0.01f); // Ajuste o tempo conforme necessï¿½rio
         if (animator != null)
         {
             animator.SetBool("IsTakingDamage", false);
         }
     }
 
-    // Método chamado quando o inimigo morre
+    // Mï¿½todo chamado quando o inimigo morre
     private void Die()
     {
         if (healthBar != null)

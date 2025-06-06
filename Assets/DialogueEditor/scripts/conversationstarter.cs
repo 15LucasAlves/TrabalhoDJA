@@ -5,6 +5,8 @@ using UnityEngine;
 public class conversationstarter : MonoBehaviour
 {
     [SerializeField] private NPCConversation myConversation;
+    [SerializeField] private Animator npcAnimator; // Reference to the NPC's Animator
+
     private PlayerAttackSystem playerAttackSystem;
     private ThirdPersonController playerController;
 
@@ -25,6 +27,12 @@ public class conversationstarter : MonoBehaviour
             if (playerController != null)
             {
                 playerController.LockCameraOnTarget(transform);  // Lock camera to NPC
+            }
+
+            // Start talking animation
+            if (npcAnimator != null)
+            {
+                npcAnimator.SetBool("isTalking", true);
             }
 
             Cursor.visible = true;
@@ -48,26 +56,36 @@ public class conversationstarter : MonoBehaviour
                 playerController.UnlockCamera();  // Unlock camera
             }
 
+            // Stop talking animation
+            if (npcAnimator != null)
+            {
+                npcAnimator.SetBool("isTalking", false);
+            }
+
             Cursor.visible = false;
             Cursor.lockState = CursorLockMode.Locked;
         }
     }
-
 
     public void EndConversation()
     {
         // Re-enable attacks and unlock camera after conversation ends
         if (playerAttackSystem != null)
         {
-            playerAttackSystem.EnableAttacks();  // Re-enable attacks
+            playerAttackSystem.EnableAttacks();
         }
 
         if (playerController != null)
         {
-            playerController.UnlockCamera();  // Unlock camera after conversation ends
+            playerController.UnlockCamera();
         }
 
-        // Hide the cursor again
+        // Stop talking animation
+        if (npcAnimator != null)
+        {
+            npcAnimator.SetBool("isTalking", false);
+        }
+
         Cursor.visible = false;
         Cursor.lockState = CursorLockMode.Locked;
     }
