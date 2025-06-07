@@ -1,5 +1,6 @@
 using UnityEngine;
 using System.Collections;
+using Cinemachine;
 
 public class SwordDamage : MonoBehaviour
 {
@@ -12,11 +13,12 @@ public class SwordDamage : MonoBehaviour
     private bool isAttacking = false;
     private bool isHeavy = false;
 
-    private Collider swordCollider; // Referência ao Collider da espada
+    private Collider swordCollider; // Referï¿½ncia ao Collider da espada
+    public CinemachineImpulseSource impulseSource;
 
     private void Awake()
     {
-        // Obtém o Collider da espada
+        // Obtï¿½m o Collider da espada
         swordCollider = GetComponent<Collider>();
         if (swordCollider != null)
         {
@@ -26,25 +28,33 @@ public class SwordDamage : MonoBehaviour
 
     private void OnTriggerEnter(Collider other)
     {
+     
+
         if (!isAttacking) return;
 
-        // Verifica se o objeto atingido é um inimigo comum
+        // Verifica se o objeto atingido ï¿½ um inimigo comum
         if (other.CompareTag(enemyTag))
         {
             EnemyStats enemy = other.GetComponent<EnemyStats>();
             if (enemy != null)
             {
+                if (impulseSource != null)
+                    impulseSource.GenerateImpulse();
+
                 int damage = isHeavy ? damageAmountHeavyAttack : damageAmountFastAttack;
                 enemy.EnemyTakeDamage(damage);
             }
         }
 
-        // Verifica se o objeto atingido é o chefe
+        // Verifica se o objeto atingido ï¿½ o chefe
         if (other.CompareTag(bossTag))
         {
             BossStats boss = other.GetComponent<BossStats>();
             if (boss != null)
             {
+                if (impulseSource != null)
+                    impulseSource.GenerateImpulse();
+
                 int damage = isHeavy ? damageAmountHeavyAttack : damageAmountFastAttack;
                 boss.BossTakeDamage(damage); // Aplica dano ao chefe
             }
@@ -53,6 +63,8 @@ public class SwordDamage : MonoBehaviour
 
     public void StartAttack(bool heavy = false, float delay = 0.5f)
     {
+     
+
         isHeavy = heavy;
         StartCoroutine(ActivateHitboxWithDelay(delay));
     }
@@ -82,9 +94,12 @@ public class SwordDamage : MonoBehaviour
         }
     }
 
-    // Método público para aplicar dano diretamente
+    // Mï¿½todo pï¿½blico para aplicar dano diretamente
     public void ApplyDamage(GameObject target)
     {
+
+       
+
         if (target.CompareTag(enemyTag))
         {
             EnemyStats enemy = target.GetComponent<EnemyStats>();
@@ -103,5 +118,7 @@ public class SwordDamage : MonoBehaviour
                 boss.BossTakeDamage(damage);
             }
         }
+
+      
     }
 }

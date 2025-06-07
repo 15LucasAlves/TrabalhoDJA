@@ -14,7 +14,7 @@ public class BossCombat : MonoBehaviour
     public float warningDelay = 1.5f;
 
     [Header("Movement Settings")]
-    public float chaseRange = 15f; // Maior alcance de perseguição
+    public float chaseRange = 15f; // Maior alcance de perseguiï¿½ï¿½o
     public float stopDistance = 2.5f;
     public float rotationSpeed = 3f;
 
@@ -69,7 +69,7 @@ public class BossCombat : MonoBehaviour
             animator?.SetBool("IsWalking", false);
         }
 
-        // Rotacione em direção ao jogador, a menos que esteja atacando
+        // Rotacione em direï¿½ï¿½o ao jogador, a menos que esteja atacando
         if (!isAttackExecuting)
         {
             RotateTowards(player.position);
@@ -91,7 +91,7 @@ public class BossCombat : MonoBehaviour
     {
         if (animator == null)
         {
-            Debug.LogWarning("Animator não está atribuído ao BossCombat.");
+            Debug.LogWarning("Animator nï¿½o estï¿½ atribuï¿½do ao BossCombat.");
             yield break;
         }
 

@@ -25,6 +25,14 @@ public class BossStats : MonoBehaviour
     [Header("Boss Settings")]
     public GameObject bossPrefab;
 
+    [Header("Health Bar")]
+    public Image healthFillImage;  // Deve ser atribuído manualmente no Inspector
+
+    private Transform healthBar;  // Referência ao objeto da barra de vida instanciado
+    private bool isDead = false;
+    private Vector3 deathPosition;
+    private Coroutine showUICoroutine;
+
     private bool playerChoseRed;
     private GameObject spawnedBall;
     private string lastCollidedLayer;
@@ -33,17 +41,12 @@ public class BossStats : MonoBehaviour
     private ThirdPersonController playerController;
     private GameObject player;
 
-    private Slider healthSlider;
-    private Transform healthBar;
-    private Vector3 healthBarOffset = new Vector3(0, 4f, 0);
-    private bool isDead = false;
-    private Vector3 deathPosition;
-    private Coroutine showUICoroutine;
-
     private void Start()
     {
         CurrentHealth = maxHealth;
         InitializeHealthBar();
+
+        Debug.Log("Boss starting health: " + CurrentHealth);
 
         if (optionCanvas != null) optionCanvas.gameObject.SetActive(false);
         if (redResultCanvas != null) redResultCanvas.gameObject.SetActive(false);
@@ -61,14 +64,30 @@ public class BossStats : MonoBehaviour
     {
         if (healthBarPrefab != null)
         {
-            GameObject hb = Instantiate(healthBarPrefab, transform.position + healthBarOffset, Quaternion.identity);
-            healthBar = hb.transform;
-            healthSlider = hb.GetComponentInChildren<Slider>();
-            if (healthSlider != null)
+            Canvas mainCanvas = FindObjectOfType<Canvas>();
+            if (mainCanvas != null)
             {
-                healthSlider.maxValue = maxHealth;
-                healthSlider.value = CurrentHealth;
+                if (healthBar != null)
+                {
+                    Destroy(healthBar.gameObject);
+                }
+
+                GameObject hb = Instantiate(healthBarPrefab, mainCanvas.transform);
+                healthBar = hb.transform;
+
+                // ATENÇÃO: após instanciar, você precisa atribuir a healthFillImage manualmente no Inspector
+                // Por exemplo, arraste o Image Fill da nova barra para este campo no Inspector!
+
+                UpdateHealthBarVisual();
             }
+        }
+    }
+
+    private void UpdateHealthBarVisual()
+    {
+        if (healthFillImage != null)
+        {
+            healthFillImage.fillAmount = (float)CurrentHealth / maxHealth;
         }
     }
 
@@ -79,10 +98,9 @@ public class BossStats : MonoBehaviour
         CurrentHealth -= amount;
         CurrentHealth = Mathf.Max(CurrentHealth, 0);
 
-        if (healthSlider != null)
-        {
-            healthSlider.value = CurrentHealth;
-        }
+        Debug.Log("Boss current health: " + CurrentHealth);
+
+        UpdateHealthBarVisual();
 
         if (CurrentHealth <= 0)
         {
@@ -97,7 +115,6 @@ public class BossStats : MonoBehaviour
 
         deathPosition = transform.position;
 
-        // DESTRUIR BARRA DE VIDA
         if (healthBar != null)
         {
             Destroy(healthBar.gameObject);
@@ -152,7 +169,7 @@ public class BossStats : MonoBehaviour
     private void SelectOption(bool choseRed)
     {
         playerChoseRed = choseRed;
-        Debug.Log("Bot�o pressionado: " + (choseRed ? "Vermelho" : "Preto"));
+        Debug.Log("Botão pressionado: " + (choseRed ? "Vermelho" : "Preto"));
 
         if (optionCanvas != null)
         {
@@ -207,7 +224,7 @@ public class BossStats : MonoBehaviour
         if (layerName == "Red" || layerName == "Black")
         {
             lastCollidedLayer = layerName;
-            Debug.Log("Colis�o com: " + layerName);
+            Debug.Log("Colisão com: " + layerName);
         }
     }
 
@@ -216,7 +233,6 @@ public class BossStats : MonoBehaviour
         yield return new WaitForSeconds(5f);
         if (spawnedBall == null) yield break;
 
-        // Mostrar resultado
         if (!string.IsNullOrEmpty(lastCollidedLayer))
         {
             if (lastCollidedLayer == "Red" && redResultCanvas != null)
@@ -233,7 +249,6 @@ public class BossStats : MonoBehaviour
             }
         }
 
-        // Verificar decis�o
         bool errou = !string.IsNullOrEmpty(lastCollidedLayer) &&
                       ((playerChoseRed && lastCollidedLayer == "Red") ||
                        (!playerChoseRed && lastCollidedLayer == "Black"));
@@ -254,8 +269,8 @@ public class BossStats : MonoBehaviour
         isDead = false;
         transform.position = deathPosition;
 
-        // RECRIAR BARRA DE VIDA NO RESPAWN
-        InitializeHealthBar();
+        InitializeHealthBar();  // RECRIA A BARRA, ATENÇÃO: reatribuir healthFillImage manualmente no Inspector!
+
         SetBossVisible(true);
         playerAttackSystem?.EnableAttacks();
 

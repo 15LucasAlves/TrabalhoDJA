@@ -2,6 +2,9 @@
 using UnityEngine;
 using UnityEngine.InputSystem;
 
+
+
+
 namespace StarterAssets
 {
     [RequireComponent(typeof(CharacterController))]
@@ -50,6 +53,8 @@ namespace StarterAssets
         public bool _hasAnimator;
 
         private PlayerStamina _playerStamina;
+
+
 
         private void Awake()
         {
@@ -142,6 +147,7 @@ namespace StarterAssets
                 }
             }
 
+
             _playerStamina.ConsumeStamina(fastAttackStaminaCost);
             canAttack = false;
             isFastAttacking = true;
@@ -198,6 +204,8 @@ namespace StarterAssets
             {
                 _animator.SetBool(_animIDHeavyAttack, true);
             }
+
+           
 
             _playerStamina.ConsumeStamina(heavyAttackStaminaCost);
             canAttack = false;
